@@ -1,0 +1,43 @@
+---
+title: Autonomous journeys
+description: "YAML-defined goals + success criteria; SimDrive runs the agent loop."
+---
+
+## TLDR
+
+A journey is a YAML file with a *goal* and *success criteria*. The
+`load_journey` MCP tool reads the journey; SimDrive then drives the agent
+loop (observe → think → act → observe) until criteria are met or a stop
+condition fires.
+
+```yaml
+journey:
+  name: signup_then_first_post
+  goal: "Sign up as a new user and post your first item."
+  bundle_id: com.acme.app
+  steps:
+    - persona:
+        name: alice
+        email: alice+{{ts}}@test.example
+        password: testpass-{{ts}}
+    - goal: "Complete the onboarding screens and reach the home feed."
+      success:
+        - assertVisible: "Welcome, alice"
+    - goal: "Create your first post titled 'hello world'."
+      success:
+        - assertVisible: "hello world"
+        - state.posts_count: ">= 1"
+  max_steps: 40
+  on_failure: capture_and_report
+```
+
+## Coming soon
+
+- The full success-criteria grammar (`assertVisible`, `assertNotVisible`,
+  `state.*`, `requires.*`)
+- Persona templating + secret injection
+- Step budgets and circuit breakers
+- Multi-device journeys (the `cross_device_state_matches` criterion is
+  deferred per the v1.0.0a13 changelog)
+
+{/* TODO: full journey guide */}

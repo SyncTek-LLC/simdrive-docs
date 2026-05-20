@@ -1,0 +1,103 @@
+---
+title: MCP-native
+description: "Why SimDrive is built as an MCP server, and what that buys you."
+---
+
+## The 10-second version
+
+Your AI agent already knows how to call tools. SimDrive exposes the iOS
+simulator (and paired devices) as **32 tools your agent can call directly**
+over [Model Context Protocol](https://modelcontextprotocol.io). No DSL, no
+selector framework, no glue code — the agent reads ticket, calls `tap` and
+`type_text`, gets back screenshots and structured state.
+
+## Why MCP, not another framework
+
+iOS automation has lived in two camps:
+
+1. **Selector-based** (XCUITest, Appium): you write code to find elements by
+   accessibility ID. Brittle, requires app instrumentation, fights with
+   SwiftUI's runtime element generation.
+2. **Click-record-replay** (Maestro, classic Studio tools): a human authors
+   the flow once via UI, the tool replays it. Author cost is high.
+
+SimDrive is a third camp: **the AI agent is the author.** The agent sees the
+screen (vision), decides what to do (reasoning), and calls a small,
+well-typed set of action tools. The same agent you already use for code is
+the agent that drives the simulator.
+
+This only works because MCP standardizes how agents discover and call tools.
+SimDrive doesn't ship a special client — it ships an MCP server. Any client
+that speaks MCP (Claude Code, Claude Desktop, Cursor, future clients) gets
+the full 32-tool surface for free.
+
+## What an MCP tool looks like
+
+Each tool has a name, a JSON Schema, and a description. Here's `tap`:
+
+```json
+{
+  "name": "tap",
+  "description": "Tap a UI element by text label, mark id, or absolute coordinates.",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "text": { "type": "string", "description": "Visible text on the target element." },
+      "mark_id": { "type": "integer", "description": "Mark id returned by observe()." },
+      "x": { "type": "number" },
+      "y": { "type": "number" }
+    }
+  }
+}
+```
+
+The agent reads the schema during connection handshake. It now knows it can
+`tap` by text, by mark id, or by coordinates — and it picks the right one
+for the situation. You never write that mapping yourself.
+
+## The full surface, at a glance
+
+| Group | Count | Tools |
+|-------|-------|-------|
+| Lifecycle | 3 | `session_start`, `session_end`, `session_status` |
+| Observe | 1 | `observe` |
+| Act | 6 | `tap`, `swipe`, `type_text`, `press_key`, `clear_field`, `dismiss_sheet` |
+| Record & Replay | 5 | `record_start`, `record_stop`, `replay`, `list_replays`, `validate_replay` |
+| Performance | 4 | `perf`, `perf_baseline`, `perf_compare`, `memory` |
+| Diagnostics | 5 | `doctor`, `app_state`, `apps`, `crashes`, `list_devices` |
+| Robustness | 3 | `dismiss_first_launch_alerts`, `pre_grant_permissions`, `set_appearance` |
+| Logs | 1 | `logs` |
+| Recordings ops | 2 | `lint_recordings`, `migrate_recording` |
+| Journeys | 1 | `load_journey` |
+| Meta | 1 | `version` |
+
+Full schemas and examples: [MCP Tool Reference](/reference/overview).
+
+## The "no selectors" claim, expanded
+
+In practice, the agent finds elements three ways:
+
+1. **`observe()` returns set-of-marks** — every interactable element gets a
+   numbered overlay on the screenshot and a corresponding entry in a
+   structured list (`{mark_id, type, frame, text, identifier}`). The agent
+   picks a mark id and calls `tap({mark_id: 7})`.
+2. **Text fallback** — `tap({text: "Sign In"})` does a case-insensitive
+   contains-match against visible labels. Faster than `observe → pick mark`
+   for obvious targets.
+3. **Coordinate fallback** — `tap({x: 195, y: 480})` when neither label nor
+   mark suffices (rare). Recordings prefer text or mark id for portability.
+
+See [Concepts → Observe](/concepts/observe) for the set-of-marks model in
+detail.
+
+## Costs
+
+The agent pays tokens on the **record** path (it sees screenshots, reasons,
+calls tools). The **replay** path is deterministic — SimDrive re-executes
+the recorded steps without calling any model. This is the unit economics
+that makes recordings worth saving:
+
+| Path | Cost per run | Variance |
+|------|--------------|----------|
+| Record (AI authors) | ~$0.05–$0.30 per flow | Some — vision tokens vary by screen complexity |
+| Replay (CI re-runs) | $0 | None — bit-for-bit deterministic |

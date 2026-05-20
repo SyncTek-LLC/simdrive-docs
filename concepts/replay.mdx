@@ -1,0 +1,73 @@
+---
+title: Record + Replay
+description: "Deterministic YAML+PNG bundles, state contracts, SSIM drift detection."
+---
+
+## TLDR
+
+A SimDrive recording is a directory:
+
+```text
+~/.simdrive/recordings/<name>/
+├── recording.yaml          # canonical replay spec
+├── recording.summary.json  # one-line status, drift events, timings
+└── screenshots/            # one PNG per step
+```
+
+`recording.yaml` is human-readable and deterministic. `simdrive replay <name>`
+re-executes it without calling any AI model — **free** in CI.
+
+## State contracts
+
+Every recording carries a `requires:` block that pins the preconditions for
+replay:
+
+```yaml
+recording:
+  name: ENG-1247-repro
+  requires:
+    target: simulator                 # or "device"
+    app:
+      bundle_id: com.acme.familybag
+    device:
+      device_name: iPhone 17
+      os_major: 26
+      os_version: "26.3"
+      udid: <only present on device>
+```
+
+| Field | Mismatch behavior |
+|-------|-------------------|
+| `requires.target` | **halt** (`replay_state_contract_failed`) |
+| `requires.app.bundle_id` | **halt** |
+| `requires.device.udid` | **halt** (device target only) |
+| `requires.device.os_major` | **halt** |
+| `requires.device.os_version` (minor diff) | **warn** only, replay proceeds |
+| `requires.device.device_name` | **warn** only |
+
+State contracts solve the "23 blind taps at SSIM 0.014" failure mode: a
+replay that's run against the wrong device or wrong app refuses to fire any
+actions, instead of degrading silently.
+
+## SSIM drift detection
+
+Before each step, SimDrive captures a live screenshot and compares it to the
+recorded pre-state via SSIM (structural similarity).
+
+| Threshold | Behavior |
+|-----------|----------|
+| SSIM ≥ 0.85 (simulator) / 0.80 (device) | Step dispatches |
+| SSIM below threshold | `replay_drift_detected` — replay halts |
+| Marks count drops to < 50% of recorded | `marks_count_drift` — halts |
+
+Drift is a feature, not a bug. A UI regression *should* halt the replay so
+you see it on the PR.
+
+## Coming soon
+
+- The `--drift halt | warn | force` flag and when to use each
+- Per-step `tolerance` overrides for known-flappy screens
+- Recording schema versioning and `migrate_recording`
+- Cross-target replay (record on sim, replay on device) — what works, what doesn't
+
+{/* TODO: full replay deep-dive */}

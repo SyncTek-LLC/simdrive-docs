@@ -1,0 +1,39 @@
+---
+title: Observe & Set-of-Marks
+description: "Vision-first element discovery."
+---
+
+## TLDR
+
+`observe()` returns two things:
+
+1. A **screenshot** of the simulator's current screen with numbered overlays
+   on every interactable element ("set-of-marks").
+2. A structured **element list** — `[{mark_id, type, frame, text, identifier}, ...]`
+   — covering everything that overlay points to.
+
+Your agent reads both. It calls `tap({mark_id: 7})` or
+`tap({text: "Sign In"})` to act. This is the vision-first replacement for
+selector frameworks.
+
+## Why set-of-marks
+
+The set-of-marks (SoM) pattern was introduced by Microsoft Research for
+GPT-4V; SimDrive uses it because it solves two real problems:
+
+- **Visual grounding** — the model sees both the screenshot AND a numbered
+  overlay, so it can refer to "tap 7" instead of describing pixel regions
+  in prose. Cheap, robust, doesn't require selectors.
+- **Determinism on replay** — the recording can store `mark_id: 7` *and*
+  the text label and frame. On replay, SimDrive re-runs observe, finds the
+  same element by label-or-coordinate, and dispatches the tap.
+
+## Coming soon
+
+- The exact algorithm for assigning mark ids (z-order traversal, hit-testing)
+- Element-type taxonomy (`Button`, `SecureTextField`, `Cell`, `Image`, ...)
+- How `observe` handles overlays, modals, and Dynamic Island
+- The redaction pass for `SecureTextField` (no rendered glyphs of a password
+  field ever hit disk — see the [redaction spec](https://github.com/SyncTek-LLC/simdrive/blob/main/simdrive/docs/REDACTION_SPEC.md))
+
+{/* TODO: full observe deep-dive */}

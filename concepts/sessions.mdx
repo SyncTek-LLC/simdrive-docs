@@ -1,0 +1,39 @@
+---
+title: Sessions
+description: "Session lifecycle, simulator vs device targets."
+---
+
+## TLDR
+
+A SimDrive session is the boot-to-quit lifecycle of an iOS Simulator (or paired
+device) under your agent's control.
+
+```python
+session_start(bundle_id="com.acme.app")   # boots sim, installs app, returns session_id
+observe()                                  # see the screen
+tap(text="Sign In")
+session_end()                              # tears down sim, releases lock
+```
+
+A process can hold one active session at a time. `session_status()` reports
+which session is live; `session_end()` is idempotent.
+
+## Targets
+
+| Target | Backed by | Use when |
+|--------|-----------|----------|
+| `simulator` (default) | `simctl` + IndigoHID | Fast, deterministic, every CI environment |
+| `device` (opt-in) | WebDriverAgent | Real-device validation, hardware sensors, App Store builds |
+
+Device target requires `SIMDRIVE_ALLOW_PHYSICAL_DEVICE=1` and a one-time
+bootstrap: `simdrive bootstrap-device <udid> --team-id <id>`. See
+[Guides → Real device](/guides/real-device).
+
+## Coming soon
+
+- Session locking and parallelism on shared CI runners
+- The `session_status` machine state diagram (booting, ready, recording, replaying, draining)
+- Idle-timeout and auto-tear-down semantics
+- Multi-session orchestration via the journey runner
+
+{/* TODO: full sessions guide */}

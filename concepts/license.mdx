@@ -1,0 +1,50 @@
+---
+title: Trial + paid licensing
+description: "Ed25519-signed, machine-locked, fully offline."
+---
+
+## TLDR
+
+| Plan | Price | What you get |
+|------|-------|--------------|
+| **Trial** | Free, 14 days | All Pro features, machine-locked |
+| **Pro** | $29 / month | One seat, all tools, unlimited CI replays |
+| **Team** | $99 / seat / month | Multi-seat, shared recording cloud |
+| **Enterprise** | Contact | Self-hosted licensing, SLA, integrations |
+
+Full pricing + ROI calculator: [simdrive.dev/pricing](https://simdrive.dev/pricing).
+
+## How licenses work
+
+SimDrive licenses are **Ed25519-signed JWT-shaped tokens** that bind a
+license id to a machine fingerprint. There is **no phone-home check** after
+`simdrive auth`. The runtime verifies the signature locally on every tool
+call. This is intentional:
+
+- CI runners (often offline or with restricted egress) work without network.
+- Air-gapped enterprise environments work.
+- We don't see what you're testing.
+
+## Trial vs paid
+
+The trial issues a 14-day token signed with the same key as paid licenses.
+It unlocks every Pro tool — there is no functional difference between trial
+and paid except expiry. After day 14:
+
+- `session_start` returns `LicenseError: trial expired`
+- All record/replay/observe tools refuse
+- `version`, `doctor`, and `simdrive auth` still work
+
+`simdrive auth <key>` replaces the trial with a paid token.
+
+## Coming soon
+
+- The full license token schema (fields, claims, fingerprint algorithm)
+- Seat management for Team plan (`simdrive seats list`, `add`, `revoke`)
+- Self-hosted licensing for Enterprise (your own signing key, your own auth
+  server)
+
+{/* TODO: licensing deep-dive */}
+
+See also: [License → Paid](/license/paid) for the operational runbook
+(activating, lost keys, machine migration).
