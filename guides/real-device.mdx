@@ -1,0 +1,38 @@
+---
+title: Real iOS device support
+description: "Bootstrap WebDriverAgent for iPhone / iPad."
+---
+
+## TLDR
+
+```bash
+export SIMDRIVE_ALLOW_PHYSICAL_DEVICE=1
+simdrive bootstrap-device <device-udid> --team-id <APPLE_TEAM_ID>
+```
+
+```python
+session_start(bundle_id="com.acme.app", udid="<device-udid>", target="device")
+```
+
+Bootstrap is one-time per device. After that, devices behave like simulators
+for `observe`, `tap`, `swipe`, `type_text`, `press_key`, `clear_field`,
+`dismiss_sheet`, and the full record/replay surface.
+
+## Known limitations
+
+- WDA bootstrap on iOS 26.x has rough edges. Expect 5+ iterations on the
+  first try (Xcode account, provisioning, allowProvisioningUpdates,
+  occasional clang frontend crash). Sim-only is the smoother path if you're
+  just trying SimDrive out.
+- App install on device is noticeably slower than `simctl install`.
+- Some HID quirks differ between sim and device — type cadence and
+  multi-touch swipes especially.
+
+## Coming soon
+
+- Step-by-step bootstrap walk-through with screenshots
+- The full `simdrive bootstrap-device --help` flag matrix
+- Cross-target replay strategy (record on sim, validate on device)
+- Device farm + Sauce Labs integration patterns
+
+{/* TODO: full real-device guide */}

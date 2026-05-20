@@ -1,0 +1,82 @@
+---
+title: Paid license activation
+description: "Activate, verify, move machines, recover a lost key."
+---
+
+## Activate
+
+After purchasing, you'll receive a license key by email. Activate with:
+
+```bash
+simdrive auth sd-pro_aB12cD34...
+```
+
+Verify:
+
+```bash
+simdrive version
+# → SimDrive 1.0.0aXX  ·  License: pro  ·  Expires: 2027-05-19
+```
+
+The activation is fully local. There is **no phone-home** after `simdrive
+auth` succeeds — the runtime verifies the Ed25519 signature on every tool
+call, no network required.
+
+## Move to a new machine
+
+Licenses are machine-locked by default. To move:
+
+```bash
+# On the old machine
+simdrive license release
+
+# On the new machine
+simdrive auth sd-pro_aB12cD34...
+```
+
+`license release` invalidates the local fingerprint binding so the same key
+can re-bind elsewhere. If you can't run `release` on the old machine (lost,
+wiped, reimaged), see "Lost the old machine" below.
+
+## I lost my key
+
+Keys live in your account at [simdrive.dev/account](https://simdrive.dev/account)
+— sign in with the email you used to purchase. You can also email
+[hello@synctek.io](mailto:hello@synctek.io) with your purchase confirmation
+and we'll resend.
+
+We do not keep a copy of your local fingerprint. The key itself is what
+matters — store it in your team's secret manager (1Password, Vault, GitHub
+Secrets).
+
+## Lost the old machine
+
+Email [hello@synctek.io](mailto:hello@synctek.io) with your account email
+and the new machine's `simdrive doctor` output. We'll force-release the
+binding from our side. Turnaround is typically < 24h.
+
+## CI activation
+
+Store the key in your CI secret manager and activate per job:
+
+```yaml
+- name: Activate SimDrive
+  run: simdrive auth ${{ secrets.SIMDRIVE_LICENSE_KEY }}
+```
+
+For ephemeral CI runners (fresh VM per job) the per-machine binding renews
+automatically — no `license release` needed. For long-lived self-hosted
+runners, run `simdrive auth` once during runner provisioning.
+
+## Common errors
+
+| Error | Cause | Fix |
+|-------|-------|-----|
+| `LicenseError: invalid signature` | Wrong key, or key was rotated | Re-fetch from account |
+| `LicenseError: machine fingerprint mismatch` | Key activated elsewhere | Run `simdrive license release` on the other machine, or email support |
+| `LicenseError: expired` | Subscription lapsed | Renew at simdrive.dev/account |
+| `LicenseError: trial expired` | Trial token, day 15+ | Run `simdrive auth <paid-key>` |
+
+## Seat management (Team plan)
+
+See [License → Seats](/license/seats).

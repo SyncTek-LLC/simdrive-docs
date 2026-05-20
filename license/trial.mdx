@@ -1,0 +1,47 @@
+---
+title: Trial activation
+description: "Start a 14-day trial, all Pro features, offline."
+---
+
+## Start a trial
+
+```bash
+simdrive trial start --email you@example.com
+```
+
+You get:
+
+- 14 days from activation
+- Every Pro tool unlocked
+- Machine-locked to the laptop or CI runner you activated on
+- No phone-home — works on flights, in air-gapped CI, on restricted networks
+
+## What happens at day 14
+
+- `session_start` returns `LicenseError: trial expired`
+- All record / replay / observe / act tools refuse
+- `version`, `doctor`, and `simdrive auth <key>` still work — you can
+  upgrade to a paid license without reinstalling
+
+## I want to extend my trial
+
+Email [hello@synctek.io](mailto:hello@synctek.io) — we'll often grant an
+extension for legit evaluation, especially for Team plans.
+
+## I want to activate on a second machine
+
+Each trial is machine-locked. Start a fresh trial on the second machine with
+the same email — the 14-day clock is per-machine, not per-account. Abuse
+is rare enough that we don't gate it; if our key-server detects systematic
+machine-cycling we'll reach out before disabling.
+
+## Next
+
+<CardGroup cols={2}>
+  <Card title="Buy a paid license" icon="credit-card" href="https://simdrive.dev/pricing">
+    $29/mo Pro, $99/seat/mo Team. ROI calculator on the page.
+  </Card>
+  <Card title="Already paid — activate" icon="key" href="/license/paid">
+    Paste your key, move between machines, recover a lost key.
+  </Card>
+</CardGroup>

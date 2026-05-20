@@ -1,0 +1,55 @@
+---
+title: Write your first journey
+description: "YAML goal + success criteria; SimDrive drives the agent loop."
+---
+
+## TLDR
+
+```yaml
+journey:
+  name: signup_then_first_post
+  goal: "Sign up a new user, complete onboarding, post 'hello world'."
+  bundle_id: com.acme.app
+  device: iPhone 17
+  os_version: "26.3"
+
+  personas:
+    - name: alice
+      email: alice+{{ts}}@test.example
+      password: testpass-{{ts}}
+
+  steps:
+    - goal: "Complete signup with persona alice and reach onboarding."
+      success:
+        - assertVisible: "Welcome, alice"
+
+    - goal: "Skip optional onboarding screens until you see the home feed."
+      success:
+        - assertVisible: "Home"
+        - assertNotVisible: "Skip"
+
+    - goal: "Post 'hello world' as your first item."
+      success:
+        - assertVisible: "hello world"
+
+  max_steps: 50
+  on_failure: capture_and_report
+```
+
+Run it:
+
+```python
+load_journey(path="./journeys/signup_then_first_post.yaml")
+# the agent then iterates observe → think → act → observe until success or max_steps
+```
+
+## Coming soon
+
+- Full success-criteria grammar (`assertVisible`, `assertNotVisible`,
+  `state.*`, `requires.*`, regex matchers)
+- Persona templating + secret injection (`{{ts}}`, `{{vault.foo}}`)
+- Per-step budgets and timeout overrides
+- Combining recordings + journeys for "scaffold replay, ad-hoc tail"
+- Output formats (JUnit XML, GitHub annotations, Slack webhook)
+
+{/* TODO: full journey-writing guide */}

@@ -1,0 +1,32 @@
+---
+title: Changelog
+description: "Release notes — synced from the simdrive package CHANGELOG.md."
+---
+
+The canonical changelog lives in the simdrive repo:
+[`simdrive/CHANGELOG.md`](https://github.com/SyncTek-LLC/simdrive/blob/main/simdrive/CHANGELOG.md).
+This page mirrors the most recent entries; sync is currently manual.
+
+## 1.0.0a13 — 2026-05-14
+
+**Record/replay parity on real device.** The deferred a12 item ships: full
+record/replay parity on `target=device`, plus a per-target state contract
+that refuses to replay against the wrong device or OS major.
+
+- `record_start` / `record_stop` / `replay` / `validate_replay` /
+  `list_replays` flipped from `(sim only)` → `(sim + device)`.
+- Device SSIM threshold: 0.80 (sim stays at 0.85). Halts loudly on drift —
+  the dogfood "23 blind taps at SSIM 0.014" failure mode fails by 57× margin.
+- State contract enforcement: `requires.target`, `requires.device.udid`,
+  `requires.device.os_major`, `requires.app.bundle_id` halt on mismatch;
+  os_version minor diff and device_name rename warn only.
+- New error codes: `replay_drift_detected`, `replay_state_contract_failed`,
+  `marks_count_drift`.
+- 20 new regression tests; 851 pass on merged suite.
+
+## Earlier versions
+
+See [`simdrive/CHANGELOG.md`](https://github.com/SyncTek-LLC/simdrive/blob/main/simdrive/CHANGELOG.md)
+for full history (1.0.0a1 through current).
+
+{/* TODO: automated sync from simdrive/CHANGELOG.md on every release */}

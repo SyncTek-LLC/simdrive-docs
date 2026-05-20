@@ -1,0 +1,24 @@
+---
+title: Team seats
+description: "Add, list, and revoke seats on a Team plan."
+---
+
+## TLDR
+
+```bash
+simdrive seats list                              # who's bound to your team key
+simdrive seats add alice@acme.com                # provision a seat
+simdrive seats revoke alice@acme.com             # release a seat
+```
+
+Each Team seat is independently machine-locked. Adding a seat issues a
+per-seat sub-key; revoking releases it within minutes.
+
+## Coming soon
+
+- The full seat-management CLI reference
+- Self-serve seat management at simdrive.dev/account
+- SCIM provisioning (Enterprise tier)
+- Audit log of seat add/revoke events
+
+{/* TODO: full seat management page */}

@@ -1,0 +1,58 @@
+---
+title: Replay in GitHub Actions
+description: "Wire SimDrive replays into your PR pipeline."
+---
+
+## TLDR
+
+```yaml
+# .github/workflows/ios-replays.yml
+name: SimDrive replays
+on:
+  pull_request:
+    paths: ['**/*.swift', 'recordings/**']
+
+jobs:
+  replay:
+    runs-on: macos-15
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - uses: maxim-lobanov/setup-xcode@v1
+        with: { xcode-version: latest-stable }
+
+      - name: Install SimDrive
+        run: pip install simdrive
+
+      - name: Activate license
+        run: simdrive auth ${{ secrets.SIMDRIVE_LICENSE_KEY }}
+
+      - name: Build app
+        run: |
+          xcodebuild \
+            -scheme MyApp \
+            -destination 'platform=iOS Simulator,name=iPhone 17,OS=26.3' \
+            -derivedDataPath ./DerivedData \
+            build
+
+      - name: Replay smoke recordings
+        run: simdrive replay --tag pr-smoke --recording-root ./recordings
+
+      - name: Upload drift artifacts on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: simdrive-drift
+          path: ~/.simdrive/recordings/**/drift/
+```
+
+## Coming soon
+
+- Bitrise + CircleCI + self-hosted runner variants
+- Caching simulator runtimes between runs
+- Per-PR replay subsets (smoke vs full vs nightly)
+- Failure triage workflow (drift diff PNG inline in PR comment)
+
+{/* TODO: full CI integration guide */}

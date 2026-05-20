@@ -1,0 +1,139 @@
+---
+title: Troubleshooting
+description: "Common errors and what to do about them."
+---
+
+When something looks wrong, **always start here**:
+
+```bash
+simdrive doctor
+```
+
+It walks every dependency (Xcode, simctl, Python, license, WDA if device
+target is enabled) and prints a green/red table with suggested fixes. Most
+issues below are surfaced by `doctor` directly.
+
+## `LicenseError: trial expired`
+
+Your 14-day trial is up. Activate a paid license:
+
+```bash
+simdrive auth <your-license-key>
+```
+
+See [License → Paid](/license/paid).
+
+## `LicenseError: machine fingerprint mismatch`
+
+Your key is bound to a different machine. Either run `simdrive license
+release` on the other machine, or email
+[hello@synctek.io](mailto:hello@synctek.io) to force-release the binding.
+
+## `WDA bootstrap failed` (real device)
+
+iOS 26.x has rough edges in the xcodebuild → device install flow. Common
+fixes:
+
+1. Open Xcode once and accept the macOS-side prompt to trust the device.
+2. Sign into your Apple ID under **Xcode → Settings → Accounts**.
+3. Add `-allowProvisioningUpdates` to your build invocation.
+4. Re-run `simdrive bootstrap-device <udid> --team-id <id>`. The first
+   attempt often fails; the second usually succeeds.
+
+If bootstrap fails 3+ times, the sim-only path is fully supported — fall
+back to `target="simulator"` while you investigate.
+
+## `replay_drift_detected`
+
+A replay step's pre-state diverged from the recording (SSIM below 0.85 sim
+/ 0.80 device, **or** marks count dropped below 50% of recorded). This is
+usually a real UI regression — the replay is doing its job.
+
+To investigate:
+
+- Look at the drift PNG diff under `~/.simdrive/recordings/<name>/drift/`.
+- Open the recorded and live screenshots side by side.
+- If the difference is intentional (e.g. you redesigned the screen),
+  re-record the flow. Recordings are cheap.
+
+If you need to push past a known-flappy step for one CI run only:
+
+```bash
+simdrive replay <name> --drift warn
+```
+
+`--drift warn` still logs the divergence but doesn't halt. Don't make this
+the default — you'll regret it the day a real regression slips through.
+
+## `replay_state_contract_failed`
+
+The recording's `requires:` block didn't match the live session (wrong
+target, wrong device, wrong app bundle id, wrong os_major). This is a hard
+halt by design — see [Concepts → Replay](/concepts/replay).
+
+## `observe` returns 0 marks
+
+The simulator screen is blank, the app crashed, or the agent's first
+`session_start` hasn't finished launching. Try:
+
+```python
+session_status()
+# → check status: should be "ready", not "booting"
+```
+
+If status is `ready` but observe still returns nothing, run `simdrive
+doctor` — usually a stale simulator runtime or a screenshot service
+crash. `simctl shutdown all` + retry resolves most cases.
+
+## `type_text` drops the first character
+
+Known iOS HID quirk on cold-boot keyboards. SimDrive includes a
+focus-settle retry, but if you still see this:
+
+1. `tap` the field first to force focus.
+2. Wait ~200ms (or call `observe()` once — it provides natural pacing).
+3. Call `type_text` again.
+
+The recording schema preserves the full text — replay does not exhibit
+this issue.
+
+## Simulator won't boot / `simctl` hangs
+
+```bash
+xcrun simctl shutdown all
+xcrun simctl erase all       # destructive — wipes all simulator state
+```
+
+Re-run `simdrive doctor` after. If `doctor` still fails, restart your Mac;
+the `CoreSimulatorService` daemon occasionally wedges itself and only a
+full reboot clears it.
+
+## `Dynamic Island` modal won't dismiss
+
+By design — Dynamic Island gestures are hardware-touch-only and reject
+synthetic events. Workaround: mock the activity provider in your test
+build, or assert after the activity expires.
+
+## Set-appearance respring
+
+`set_appearance(mode="dark")` triggers a Springboard respring on some
+runtimes. Add a ~1.5s pause (or one `observe()`) before the next action.
+
+## My recording works locally but fails in CI
+
+99% of the time:
+
+1. **Simulator runtime mismatch.** Pin the runtime in CI:
+   `xcodebuild -destination 'platform=iOS Simulator,name=iPhone 17,OS=26.3'`
+2. **App build is stale.** Add a build step before the replay.
+3. **License not activated** on the CI runner. Add `simdrive auth ${{ secrets.SIMDRIVE_LICENSE_KEY }}` to the workflow.
+
+If all three are correct and the replay still fails, check the drift PNG
+artifact — it'll show you exactly which screen diverged.
+
+## Still stuck
+
+- File an issue: [github.com/SyncTek-LLC/simdrive/issues](https://github.com/SyncTek-LLC/simdrive/issues)
+- Email: [hello@synctek.io](mailto:hello@synctek.io)
+- Always include `simdrive doctor` output — it has 90% of what we need to
+  triage.

@@ -1,0 +1,26 @@
+---
+title: Reproduce a bug end-to-end
+description: "From Linear ticket to merged PR with a SimDrive recording attached."
+---
+
+## TLDR
+
+1. Paste the ticket into your MCP client.
+2. Agent walks the steps via SimDrive, captures the failure as a recording.
+3. Attach the recording bundle (or its summary) to the PR.
+4. Ship the fix.
+5. `simdrive replay <name>` in CI prevents regression — free, forever.
+
+The 60-second variant is documented in
+[Quickstart → First bug](/quickstart/first-bug). This guide adds the
+end-to-end wiring (Linear/Jira integration, PR templates, recording storage
+conventions).
+
+## Coming soon
+
+- PR description template with the right artifacts inline
+- Recording naming conventions (`<TICKET>-repro`, `<TICKET>-validate`)
+- Recording storage: in-repo `recordings/` vs S3 vs Mintlify-equivalent doc bundle
+- Linear "Reproduce" custom action wiring
+
+{/* TODO: full bug-repro guide */}
