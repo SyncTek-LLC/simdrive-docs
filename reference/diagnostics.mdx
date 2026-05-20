@@ -1,0 +1,49 @@
+---
+title: Diagnostics & logs
+description: "doctor, crashes, logs, dismiss_first_launch_alerts, version."
+---
+
+## `doctor`
+
+Walk every SimDrive dependency, report green/red, suggest fixes. Your first
+stop when something looks wrong.
+
+```python
+doctor()
+```
+
+## `crashes`
+
+List recent crash logs for the target bundle id.
+
+```python
+crashes(bundle_id="com.acme.app", since="1h")
+```
+
+## `logs`
+
+Stream or fetch device logs filtered by process or subsystem.
+
+```python
+logs(bundle_id="com.acme.app", since="5m", level="error")
+```
+
+## `dismiss_first_launch_alerts`
+
+Auto-dismiss the standard first-launch system alerts (notifications, App
+Tracking Transparency, location, etc).
+
+```python
+dismiss_first_launch_alerts()
+```
+
+## `version`
+
+Report the installed SimDrive version, license status, and active runtime
+versions.
+
+```python
+version()
+```
+
+{/* TODO: full log filter grammar, crash bundle path, doctor's exhaustive check list */}

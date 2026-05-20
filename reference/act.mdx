@@ -1,0 +1,62 @@
+---
+title: Act
+description: "tap, swipe, type_text, press_key, clear_field, dismiss_sheet."
+---
+
+## `tap`
+
+Tap an element by text label, mark id, or absolute coordinates.
+
+```python
+tap(text="Sign In")
+tap(mark_id=7)
+tap(x=195, y=480)
+```
+
+## `swipe`
+
+Swipe between two points (absolute or normalized 0–1 coordinates).
+
+```python
+swipe(from_x=200, from_y=600, to_x=200, to_y=200, duration_ms=300)
+```
+
+## `type_text`
+
+Type into the currently-focused field via the simulator's HID input stream.
+
+```python
+type_text(text="hello@example.com", clear_first=False)
+```
+
+<Note>
+  Known quirk: the first character occasionally drops on cold-boot keyboards.
+  Workaround is built in (re-type after focus settle); see
+  [Troubleshooting](/troubleshooting).
+</Note>
+
+## `press_key`
+
+Send a hardware-style key (home, lock, volume_up/down, return).
+
+```python
+press_key(key="home")
+```
+
+## `clear_field`
+
+Clear the focused text field (select-all + delete).
+
+```python
+clear_field()
+```
+
+## `dismiss_sheet`
+
+Dismiss the topmost half-sheet or modal via a swipe-down at the grabber.
+
+```python
+dismiss_sheet()
+```
+
+{/* TODO: per-tool error codes + coordinate semantics + device parity table */}

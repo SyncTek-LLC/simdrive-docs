@@ -1,0 +1,39 @@
+---
+title: Observe
+description: "observe, screenshot."
+---
+
+## `observe`
+
+Capture a screenshot of the current simulator screen with set-of-marks
+annotations, plus a structured element list.
+
+```python
+observe(
+  annotate=True,          # draw numbered marks on screenshot (default true)
+  include_offscreen=False # include partially-offscreen elements
+)
+```
+
+**Returns:**
+
+```json
+{
+  "screenshot": "<base64 PNG>",
+  "marks_count": 12,
+  "elements": [
+    {
+      "mark_id": 1,
+      "type": "Button",
+      "text": "Sign In",
+      "identifier": "signInButton",
+      "frame": { "x": 120, "y": 580, "w": 240, "h": 48 }
+    }
+  ],
+  "redactions": [ /* SecureTextField frames blacked out */ ]
+}
+```
+
+See [Concepts → Observe](/concepts/observe) for the model.
+
+{/* TODO: screenshot-only tool variant + full schema */}

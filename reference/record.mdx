@@ -1,0 +1,67 @@
+---
+title: Record + Replay
+description: "record_start, record_stop, replay, list_replays, validate_replay, lint_recordings, migrate_recording."
+---
+
+## `record_start`
+
+Begin recording. Every subsequent act tool gets a screenshot + YAML step
+appended to the recording bundle.
+
+```python
+record_start(name="ENG-1247-repro", tags=["smoke", "auth"])
+```
+
+## `record_stop`
+
+Flush + finalize the recording. Writes `recording.yaml` and
+`recording.summary.json`.
+
+```python
+record_stop(name="ENG-1247-repro")
+```
+
+## `replay`
+
+Re-execute a recording deterministically. Free — no AI tokens consumed.
+
+```python
+replay(name="ENG-1247-repro", drift="halt")   # or "warn" or "force"
+```
+
+## `validate_replay`
+
+Dry-run a replay: verify state contract, schema, and per-step prerequisites
+without dispatching actions.
+
+```python
+validate_replay(name="ENG-1247-repro")
+```
+
+## `list_replays`
+
+List recordings in the recordings root.
+
+```python
+list_replays()                                 # all
+list_replays(tag="smoke")                      # filtered
+```
+
+## `lint_recordings`
+
+Static lint pass: schema, state contract completeness, dead steps, redaction
+gaps.
+
+```python
+lint_recordings(name="ENG-1247-repro")
+```
+
+## `migrate_recording`
+
+Forward-migrate a recording to the current schema version.
+
+```python
+migrate_recording(name="ENG-1247-repro")
+```
+
+{/* TODO: drift modes table + per-tool error codes + recording schema link */}

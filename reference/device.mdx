@@ -1,0 +1,57 @@
+---
+title: Device + app state
+description: "list_devices, app_state, apps, pre_grant_permissions, set_appearance."
+---
+
+## `list_devices`
+
+List available simulators and paired physical devices.
+
+```python
+list_devices()
+# → [{ udid, name, os_version, target, status }, ...]
+```
+
+## `app_state`
+
+Inspect the running app: foreground/background, current view controller,
+process state.
+
+```python
+app_state(bundle_id="com.acme.app")
+```
+
+## `apps`
+
+List installed apps on the current target.
+
+```python
+apps()
+```
+
+## `pre_grant_permissions`
+
+Pre-grant TCC permissions (Camera, Microphone, Location, Photos, Contacts,
+Calendar, Reminders) to skip first-launch alerts.
+
+```python
+pre_grant_permissions(
+  bundle_id="com.acme.app",
+  permissions=["camera", "microphone", "location_always"]
+)
+```
+
+## `set_appearance`
+
+Switch the simulator between light and dark mode.
+
+```python
+set_appearance(mode="dark")
+```
+
+<Note>
+  `set_appearance` triggers a Springboard respring on some simulator runtimes.
+  Allow ~1.5s before calling `observe()`.
+</Note>
+
+{/* TODO: full permission taxonomy, device-target parity table */}

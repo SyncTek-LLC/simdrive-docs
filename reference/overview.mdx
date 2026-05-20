@@ -1,0 +1,24 @@
+---
+title: MCP Tool Reference
+description: "All 32 SimDrive MCP tools, grouped by domain."
+---
+
+SimDrive exposes 32 MCP tools. The canonical, machine-readable list lives in
+[`simdrive/src/simdrive/server.py::_TOOLS`](https://github.com/SyncTek-LLC/simdrive/blob/main/simdrive/src/simdrive/server.py).
+This reference is a human-friendly mirror.
+
+| Group | Page | Tool count |
+|-------|------|------------|
+| Session lifecycle | [Lifecycle](/reference/lifecycle) | 3 |
+| Observe | [Observe](/reference/observe) | 1 |
+| Act | [Act](/reference/act) | 6 |
+| Record + Replay | [Record](/reference/record) | 5 |
+| Performance | [Perf](/reference/perf) | 4 |
+| Journey | [Journey](/reference/journey) | 1 |
+| Device + app state | [Device](/reference/device) | 4 |
+| Diagnostics & logs | [Diagnostics](/reference/diagnostics) | 8 |
+
+<Note>
+  Tool schemas in the live server are the source of truth. If this reference
+  drifts from `_TOOLS`, the server wins — file an issue and we'll catch up.
+</Note>

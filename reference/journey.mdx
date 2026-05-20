@@ -1,0 +1,17 @@
+---
+title: Journey
+description: "load_journey."
+---
+
+## `load_journey`
+
+Load a YAML journey file, validate it, and stage it for execution by the
+agent loop.
+
+```python
+load_journey(path="./journeys/signup_then_first_post.yaml")
+```
+
+See [Concepts → Journeys](/concepts/journeys) for the journey spec.
+
+{/* TODO: full journey schema, execution semantics, on_failure hooks */}

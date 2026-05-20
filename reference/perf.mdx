@@ -1,0 +1,45 @@
+---
+title: Performance
+description: "perf, perf_baseline, perf_compare, memory."
+---
+
+## `perf`
+
+Snapshot CPU%, RSS, thread count, footprint at the current moment.
+
+```python
+perf()
+# → { cpu_percent, rss_mb, threads, footprint_mb, dirty_mb, ... }
+```
+
+## `perf_baseline`
+
+Save a baseline snapshot under a name for later comparison.
+
+```python
+perf_baseline(name="signin-baseline")
+```
+
+## `perf_compare`
+
+Diff the current process state against a saved baseline.
+
+```python
+perf_compare(name="signin-baseline")
+# → { cpu_delta, rss_delta_mb, regression: bool }
+```
+
+## `memory`
+
+Detailed memory breakdown (RSS, dirty, swapped, clean, footprint).
+
+```python
+memory()
+```
+
+<Note>
+  SimDrive does not parse `xctrace --template Allocations` traces — for
+  per-class allocation hotspots use Instruments.app directly.
+</Note>
+
+{/* TODO: thresholds, regression detection algorithm, CI integration */}

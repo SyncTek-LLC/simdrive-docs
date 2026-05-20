@@ -1,0 +1,41 @@
+---
+title: Session lifecycle
+description: "session_start, session_end, session_status."
+---
+
+## `session_start`
+
+Boot a simulator (or attach a paired device), install + launch a target app,
+return a `session_id`.
+
+```python
+session_start(
+  bundle_id="com.acme.app",
+  device="iPhone 17",          # optional, default = first booted sim
+  os_version="26.3",
+  target="simulator",          # or "device"
+  udid="<device-udid>"         # device target only
+)
+```
+
+**Returns:** `{ session_id, target, device, os_version, bundle_id, status }`
+
+## `session_end`
+
+Tear down the session, release the simulator lock, drain pending recorders.
+Idempotent.
+
+```python
+session_end()
+```
+
+## `session_status`
+
+Report current session state.
+
+```python
+session_status()
+# → { session_id, status: "ready" | "recording" | "replaying" | ..., device, bundle_id }
+```
+
+{/* TODO: full schemas, error codes, examples per tool */}
