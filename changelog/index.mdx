@@ -7,6 +7,34 @@ The canonical changelog lives in the simdrive repo:
 [`simdrive/CHANGELOG.md`](https://github.com/SyncTek-LLC/simdrive/blob/main/simdrive/CHANGELOG.md).
 This page mirrors the most recent entries; sync is currently manual.
 
+## 1.0.0b1 — 2026-05-18
+
+**First beta release.** Trial+paywall model live; bug-reproduction positioning. Six months of alpha development consolidated into a publishable, monetizable beta.
+
+### Added — Business model
+
+- **14-day free trial** — `simdrive trial start --email you@example.com` issues an Ed25519-signed local license valid for 14 days, full Pro feature access. Email+machine SHA-256 de-dupe prevents infinite re-trials.
+- **License authentication** — `simdrive auth <license-key>` redeems a Polar-issued production license. Writes to `~/.simdrive/license.json`, validates against the embedded public key.
+- **Paywall enforcement on every MCP tool** — all 32 MCP tools now gate on `check_entitlement()`. After trial expiry, `LicenseError` is raised with a structured `license_required` envelope (`pricing_url`, `auth_command_hint`, `trial_command_hint`) so the MCP client surfaces a copy-pasteable recovery path.
+
+### Added — Positioning
+
+- README, PyPI description, and `llms.txt` rewritten around the bug-reproduction use case: "Reproduce and validate iOS bugs in 60 seconds with Claude." Supporting capabilities (record/replay, journey runner, real device, perf baselines) get co-equal real estate.
+
+### Added — Release engineering
+
+- New publish workflow: triggers on `simdrive-v*` tag pattern, gates on version-match + CHANGELOG-head + non-live pytest + fresh-venv install smoke, publishes via PyPI Trusted Publisher (OIDC, no static token).
+- Production license-signing keypair rotated; private key bound to the `simdrive-license-api` Cloudflare Worker for license issuance on Polar webhook events.
+
+### Changed
+
+- Test suite: autouse dev-trial fixture in CI; 949 tests passing, 74.77% coverage on hot-path modules.
+- Security baseline: pinned `requirements.lock`, `pip-audit --strict`, CodeQL Python, gitleaks all on every PR.
+
+### Removed
+
+- "no API key required" framing (contradicted the trial+paywall model).
+
 ## 1.0.0a13 — 2026-05-14
 
 **Record/replay parity on real device.** The deferred a12 item ships: full
