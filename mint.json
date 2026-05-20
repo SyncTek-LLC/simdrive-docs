@@ -1,0 +1,159 @@
+{
+  "$schema": "https://mintlify.com/schema.json",
+  "name": "SimDrive",
+  "logo": {
+    "light": "/logo/wordmark.svg",
+    "dark": "/logo/wordmark-dark.svg",
+    "href": "https://simdrive.dev"
+  },
+  "favicon": "/logo/sd-favicon.svg",
+  "colors": {
+    "primary": "#22D3EE",
+    "light": "#67E8F9",
+    "dark": "#0891B2",
+    "anchors": {
+      "from": "#22D3EE",
+      "to": "#0891B2"
+    },
+    "background": {
+      "light": "#FFFFFF",
+      "dark": "#0A0A0A"
+    }
+  },
+  "modeToggle": {
+    "default": "dark"
+  },
+  "metadata": {
+    "og:image": "/images/og-image.png",
+    "og:site_name": "SimDrive",
+    "og:type": "website",
+    "twitter:card": "summary_large_image",
+    "twitter:site": "@synctekio"
+  },
+  "topbarCtaButton": {
+    "name": "Get SimDrive",
+    "url": "https://simdrive.dev/pricing"
+  },
+  "topbarLinks": [
+    {
+      "name": "GitHub",
+      "url": "https://github.com/SyncTek-LLC/simdrive"
+    },
+    {
+      "name": "PyPI",
+      "url": "https://pypi.org/project/simdrive/"
+    }
+  ],
+  "primaryTab": {
+    "name": "Docs"
+  },
+  "tabs": [
+    {
+      "name": "Reference",
+      "url": "reference"
+    },
+    {
+      "name": "Changelog",
+      "url": "changelog"
+    }
+  ],
+  "anchors": [
+    {
+      "name": "Quickstart",
+      "icon": "rocket",
+      "url": "quickstart"
+    },
+    {
+      "name": "Concepts",
+      "icon": "book",
+      "url": "concepts"
+    },
+    {
+      "name": "Guides",
+      "icon": "list-check",
+      "url": "guides"
+    },
+    {
+      "name": "Pricing",
+      "icon": "credit-card",
+      "url": "https://simdrive.dev/pricing"
+    }
+  ],
+  "navigation": [
+    {
+      "group": "Get Started",
+      "pages": [
+        "introduction",
+        "quickstart/install",
+        "quickstart/first-bug",
+        "quickstart/ci"
+      ]
+    },
+    {
+      "group": "Concepts",
+      "pages": [
+        "concepts/mcp",
+        "concepts/sessions",
+        "concepts/observe",
+        "concepts/replay",
+        "concepts/journeys",
+        "concepts/license"
+      ]
+    },
+    {
+      "group": "Guides",
+      "pages": [
+        "guides/bug-repro",
+        "guides/ci-integration",
+        "guides/real-device",
+        "guides/journeys"
+      ]
+    },
+    {
+      "group": "License",
+      "pages": [
+        "license/trial",
+        "license/paid",
+        "license/seats"
+      ]
+    },
+    {
+      "group": "Troubleshooting",
+      "pages": [
+        "troubleshooting"
+      ]
+    },
+    {
+      "group": "MCP Tool Reference",
+      "pages": [
+        "reference/overview",
+        "reference/lifecycle",
+        "reference/observe",
+        "reference/act",
+        "reference/record",
+        "reference/perf",
+        "reference/journey",
+        "reference/device",
+        "reference/diagnostics"
+      ]
+    },
+    {
+      "group": "Releases",
+      "pages": [
+        "changelog/index"
+      ]
+    }
+  ],
+  "footerSocials": {
+    "github": "https://github.com/SyncTek-LLC/simdrive",
+    "website": "https://simdrive.dev"
+  },
+  "feedback": {
+    "thumbsRating": true,
+    "suggestEdit": true,
+    "raiseIssue": true
+  },
+  "search": {
+    "prompt": "Search SimDrive docs..."
+  }
+}
