@@ -1,0 +1,125 @@
+---
+title: Install
+description: "pip install simdrive, start a trial, wire the MCP server."
+---
+
+## Requirements
+
+- macOS (Apple silicon or Intel)
+- Xcode 15 or later, with command-line tools installed (`xcode-select --install`)
+- Python 3.10+
+
+SimDrive drives the iOS Simulator via `simctl` and (optionally) paired
+physical devices via WebDriverAgent. Linux and Windows are not supported —
+the underlying tools are macOS-only.
+
+## Install
+
+```bash
+pip install simdrive
+```
+
+Verify:
+
+```bash
+simdrive version
+simdrive doctor          # walks every dependency, prints a green/red table
+```
+
+`doctor` is your first stop whenever something looks off — it surfaces missing
+Xcode, broken simulator runtimes, stale `simctl` caches, and WDA bootstrap
+issues without spinning up a real session.
+
+## Start a trial
+
+```bash
+simdrive trial start --email you@example.com
+```
+
+The trial is **14 days, all Pro features, fully offline.** The license is
+Ed25519-signed and machine-locked — it works in CI sandboxes, on flights, and
+on developer laptops that can't reach the network. There is no
+phone-home check after activation.
+
+After 14 days, paid licenses unlock the full surface:
+
+```bash
+simdrive auth <your-license-key>
+```
+
+See [Licensing — Paid](/license/paid) for what to do if your key is lost or
+you move to a new machine.
+
+## Wire SimDrive into your MCP client
+
+SimDrive runs as an MCP server. Add it once, your agent gets all 32 tools.
+
+<Tabs>
+  <Tab title="Claude Code">
+    Add to `.claude/mcp.json` (project-scoped) or `~/.claude/mcp.json` (global):
+
+    ```json
+    {
+      "mcpServers": {
+        "simdrive": { "command": "simdrive" }
+      }
+    }
+    ```
+
+    Or use the CLI:
+
+    ```bash
+    claude code mcp add simdrive simdrive
+    ```
+
+    Restart Claude Code. Type `/mcp` to confirm `simdrive` is listed and
+    `connected`.
+  </Tab>
+  <Tab title="Claude Desktop">
+    Edit `~/Library/Application Support/Claude/claude_desktop_config.json`:
+
+    ```json
+    {
+      "mcpServers": {
+        "simdrive": { "command": "simdrive" }
+      }
+    }
+    ```
+
+    Quit and relaunch Claude Desktop.
+  </Tab>
+  <Tab title="Cursor">
+    Edit `~/.cursor/mcp.json`:
+
+    ```json
+    {
+      "mcpServers": {
+        "simdrive": { "command": "simdrive" }
+      }
+    }
+    ```
+
+    Restart Cursor.
+  </Tab>
+</Tabs>
+
+## Smoke test
+
+In your MCP client, ask:
+
+> Use simdrive to start a session against the default simulator, observe the
+> home screen, and stop the session.
+
+You should see your agent call `session_start`, `observe`, and `session_end`
+in that order. If it does — you're wired in.
+
+## Next
+
+<CardGroup cols={2}>
+  <Card title="Reproduce your first bug" icon="bug" href="/quickstart/first-bug">
+    60-second loop: ticket → repro → recording attached to PR.
+  </Card>
+  <Card title="Understand the MCP model" icon="plug" href="/concepts/mcp">
+    Why SimDrive is MCP-native and what that buys you.
+  </Card>
+</CardGroup>

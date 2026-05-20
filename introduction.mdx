@@ -1,0 +1,89 @@
+---
+title: SimDrive
+description: "Reproduce and validate iOS bugs in 60 seconds with Claude."
+---
+
+<img
+  className="block dark:hidden"
+  src="/images/avatar-1024-cyan.svg"
+  alt="SimDrive"
+  width="120"
+/>
+<img
+  className="hidden dark:block"
+  src="/images/avatar-1024-cyan.svg"
+  alt="SimDrive"
+  width="120"
+/>
+
+SimDrive is the **MCP-native iOS automation toolkit your AI agent already knows
+how to drive.** Hand it a Linear ticket, watch it walk the steps in the
+simulator (or a paired real device), and get back a deterministic recording
+that replays free in CI forever.
+
+```text
+You (in Cursor / Claude Code):
+  "Use simdrive to reproduce ENG-1247 — sign-in fails on iPhone 17 /
+   iOS 26.3 with test@example.com."
+
+Claude:
+  → session_start({device: "iPhone 17", os_version: "26.3", bundle_id: "com.acme.app"})
+  → observe()                              # screenshot + annotated marks
+  → tap({text: "Email"})
+  → type_text({text: "test@example.com"})
+  → tap({text: "Sign In"})
+  → observe()                              # error toast captured
+  → record_stop({name: "ENG-1247-repro"})  # YAML+PNG attached to PR
+```
+
+After you ship the fix, the same recording replays free in CI — no AI cost on
+every run.
+
+## Why SimDrive
+
+<CardGroup cols={2}>
+  <Card title="Bug repro in 60s" icon="bug" href="/quickstart/first-bug">
+    Paste the ticket, watch the agent walk it, attach the recording to the PR.
+  </Card>
+  <Card title="Record once, replay free" icon="circle-play" href="/concepts/replay">
+    Recordings are deterministic YAML + PNG bundles. Zero AI cost on replay.
+  </Card>
+  <Card title="MCP-native" icon="plug" href="/concepts/mcp">
+    32 tools your agent already knows. No selectors, no custom DSL.
+  </Card>
+  <Card title="Real iOS device" icon="mobile" href="/guides/real-device">
+    WebDriverAgent-backed. One command bring-up per device.
+  </Card>
+</CardGroup>
+
+## Start here
+
+<CardGroup cols={3}>
+  <Card title="Install" icon="terminal" href="/quickstart/install">
+    `pip install simdrive` and trial activation.
+  </Card>
+  <Card title="First bug" icon="rocket" href="/quickstart/first-bug">
+    Reproduce a bug in 60 seconds.
+  </Card>
+  <Card title="CI replay" icon="github" href="/quickstart/ci">
+    Wire recordings into GitHub Actions.
+  </Card>
+</CardGroup>
+
+## What is SimDrive *not*
+
+Honesty up front:
+
+- Not a record-and-replay tool you click through a UI to author. The author
+  is your AI agent.
+- Not a selector-based test framework. SimDrive uses vision + set-of-marks
+  annotation, not XPath or accessibility IDs.
+- Not a CI runner. SimDrive runs *inside* your CI (GitHub Actions, Bitrise,
+  CircleCI) — bring your own runner.
+
+## License
+
+SimDrive ships under the [Elastic License 2.0](https://www.elastic.co/licensing/elastic-license).
+Free for internal use; prohibits offering SimDrive as a competing managed
+service. These docs are MIT-licensed — contributions welcome at
+[SyncTek-LLC/simdrive-docs](https://github.com/SyncTek-LLC/simdrive-docs).

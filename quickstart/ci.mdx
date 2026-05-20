@@ -1,0 +1,39 @@
+---
+title: Replay in CI
+description: "Record once with AI, replay free on every CI run."
+---
+
+## TLDR
+
+```yaml
+# .github/workflows/ios-replays.yml
+name: SimDrive replays
+on: [pull_request]
+jobs:
+  replay:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: pip install simdrive
+      - run: simdrive auth ${{ secrets.SIMDRIVE_LICENSE_KEY }}
+      - run: xcodebuild -scheme MyApp -destination 'platform=iOS Simulator,name=iPhone 17' build
+      - run: simdrive replay ENG-1247-repro --recording-root ./recordings
+```
+
+CI replay is **free** — no AI tokens consumed once the recording exists.
+SimDrive only uses the model when an agent is *creating* a flow (record), not
+replaying one.
+
+## Coming soon
+
+Detailed walkthrough including:
+
+- Matrix builds across simulator + real device
+- Caching the simulator runtime to shave 4 minutes off cold start
+- Per-PR replay subsets via `--tag pr-smoke`
+- Failure artifact upload (drift diffs, before/after PNGs)
+- Bitrise, CircleCI, and self-hosted runner examples
+
+{/* TODO: full CI guide */}

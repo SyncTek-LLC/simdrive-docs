@@ -1,0 +1,125 @@
+---
+title: Reproduce a bug in 60 seconds
+description: "Paste a ticket, watch the agent walk it, attach the recording to the PR."
+---
+
+This is the SimDrive hero loop. By the end of this page you will have:
+
+1. Started a SimDrive session against an iOS Simulator
+2. Watched an agent reproduce a bug from a plain-English ticket
+3. Saved the failing flow as a deterministic recording
+4. Attached the recording's artifacts to a PR
+
+Total time: under three minutes for the first run, under 60 seconds once you're
+warmed up.
+
+## Prereqs
+
+- SimDrive installed and trial activated — see [Install](/quickstart/install)
+- An MCP client wired to SimDrive (Claude Code, Claude Desktop, or Cursor)
+- An iOS app build you can install on the simulator (`.app` directory)
+
+The example below uses `com.acme.familybag` as the bundle id and the
+`iPhone 17 / iOS 26.3` runtime. Swap in your own.
+
+## The prompt
+
+In your MCP client, paste:
+
+```text
+Use simdrive to reproduce ENG-1247 - sign-in fails on iPhone 17 / iOS 26.3.
+Open com.acme.familybag, try test@example.com / pw123, and capture
+whatever error shows. Save the recording as "ENG-1247-repro".
+```
+
+That's the entire interface. No selectors. No DSL. The ticket text is the
+spec.
+
+## What the agent does
+
+The agent will call these tools in order. You'll see them stream in the chat:
+
+```text
+session_start({device: "iPhone 17", os_version: "26.3", bundle_id: "com.acme.familybag"})
+observe()                              # → screenshot + element marks
+record_start({name: "ENG-1247-repro"})
+tap({text: "Email"})
+type_text({text: "test@example.com"})
+tap({text: "Password"})
+type_text({text: "pw123"})
+tap({text: "Sign In"})
+observe()                              # captures the error toast
+record_stop({name: "ENG-1247-repro"})
+session_end()
+```
+
+Every act tool (`tap`, `swipe`, `type_text`, etc.) records a screenshot
+beforehand and writes a YAML step. The final `record_stop` flushes the bundle
+to `~/.simdrive/recordings/ENG-1247-repro/`.
+
+## What you get back
+
+```text
+~/.simdrive/recordings/ENG-1247-repro/
+├── recording.yaml          # canonical replay spec
+├── recording.summary.json  # one-line status, drift events, timings
+└── screenshots/
+    ├── 001-observe.png
+    ├── 002-tap.png
+    ├── 003-type.png
+    ├── 004-tap.png
+    ├── 005-tap.png
+    └── 006-observe.png     # the bug, with error toast visible
+```
+
+The `recording.yaml` is deterministic and human-editable:
+
+```yaml
+recording:
+  name: ENG-1247-repro
+  version: 1
+  requires:
+    target: simulator
+    app:
+      bundle_id: com.acme.familybag
+    device:
+      device_name: iPhone 17
+      os_major: 26
+  steps:
+    - id: 1
+      type: observe
+    - id: 2
+      type: tap
+      args: { text: "Email" }
+    - id: 3
+      type: type_text
+      args: { text: "test@example.com" }
+    # ...
+```
+
+## Attach to the PR
+
+Zip and upload the recording directory to your PR description, or commit it
+to a `recordings/` folder in your test repo. Two-line PR description:
+
+```text
+Repro: simdrive replay ENG-1247-repro
+Bug:   sign-in fails with "Network unavailable" toast on Wi-Fi.
+```
+
+## Ship the fix, replay free
+
+Once the bug is fixed, the same recording becomes a regression test. From CI
+(or your laptop):
+
+```bash
+simdrive replay ENG-1247-repro
+```
+
+The replay is deterministic — no AI tokens consumed, no model variance, no
+cost per CI run. SimDrive verifies each step's pre-state via SSIM and marks
+count before dispatching, so a real UI regression halts loudly with
+`replay_drift_detected` instead of silently passing.
+
+See [Concepts → Record + Replay](/concepts/replay) for the full mental model
+and [Quickstart → CI replay](/quickstart/ci) for the GitHub Action stub.
