@@ -2,20 +2,24 @@
 #
 # Triggered by `repository_dispatch` event_type=simdrive-release sent from
 # `SyncTek-LLC/simdrive` after a successful PyPI publish. Payload:
-#   { version, tag, pypi_url, changelog_url, release_url }
+#   { version, tag, pypi_url, release_url, changelog_section_b64 }
+#
+# `changelog_section_b64` is the base64-encoded CHANGELOG section for the
+# released version, extracted upstream (engine has full checkout access at
+# the tag; downstream does NOT -- the engine repo is private). Base64 avoids
+# JSON-escape headaches with multiline markdown in `client_payload`.
 #
 # Action plan:
-#   1. Fetch the engine CHANGELOG.md at the release tag.
+#   1. Decode `changelog_section_b64` into `.release-tmp/CHANGELOG.md`.
 #   2. Run scripts/apply-release.mjs to:
 #        - Update `changelog/index.mdx` -- prepend the new release block.
-#        - Update `quickstart/install.mdx` install snippet if we ever move
-#          from `pip install simdrive` (unpinned) to a pinned form.
-#        - Update `mint.json` `name` field only if we surface the version
-#          there (today we don't -- keep this slot open).
 #   3. Commit + push to main. Mintlify auto-deploys on push (~30s build).
 #
-# Manual fallback: run scripts/apply-release.mjs locally with env vars set
-# and `git push`.
+# Manual fallback: workflow_dispatch with `version` + `tag` inputs runs as
+# metadata-only (no changelog entry written) UNLESS the operator pastes a
+# base64-encoded section into the optional `changelog_section_b64` input.
+# For a full local backfill, prefer running `scripts/apply-release.mjs`
+# directly against a local engine checkout.
 
 name: Apply SimDrive release
 
@@ -30,6 +34,10 @@ on:
       tag:
         description: "Engine git tag, e.g. simdrive-v1.0.0b6"
         required: true
+      changelog_section_b64:
+        description: "Base64-encoded CHANGELOG section for this version (optional; if empty, run is metadata-only)"
+        required: false
+        default: ""
 
 permissions:
   contents: write
@@ -53,27 +61,39 @@ jobs:
           P_TAG: ${{ github.event.client_payload.tag }}
           P_RELEASE_URL: ${{ github.event.client_payload.release_url }}
           P_PYPI_URL: ${{ github.event.client_payload.pypi_url }}
+          P_SECTION_B64: ${{ github.event.client_payload.changelog_section_b64 }}
           I_VERSION: ${{ inputs.version }}
           I_TAG: ${{ inputs.tag }}
+          I_SECTION_B64: ${{ inputs.changelog_section_b64 }}
         run: |
           set -euo pipefail
           VER="${P_VERSION:-$I_VERSION}"
           TAG="${P_TAG:-$I_TAG}"
           PYPI_URL="${P_PYPI_URL:-https://pypi.org/project/simdrive/${VER}/}"
           RELEASE_URL="${P_RELEASE_URL:-https://github.com/SyncTek-LLC/simdrive/releases/tag/${TAG}}"
+          SECTION_B64="${P_SECTION_B64:-$I_SECTION_B64}"
           echo "version=$VER"             >> "$GITHUB_OUTPUT"
           echo "tag=$TAG"                 >> "$GITHUB_OUTPUT"
           echo "pypi_url=$PYPI_URL"       >> "$GITHUB_OUTPUT"
           echo "release_url=$RELEASE_URL" >> "$GITHUB_OUTPUT"
+          if [ -n "$SECTION_B64" ]; then
+            echo "has_section=true"  >> "$GITHUB_OUTPUT"
+          else
+            echo "has_section=false" >> "$GITHUB_OUTPUT"
+          fi
+          mkdir -p .release-tmp
+          printf '%s' "$SECTION_B64" > .release-tmp/section.b64
 
-      - name: Fetch upstream CHANGELOG at tag
+      - name: Decode CHANGELOG section from payload
+        if: steps.vars.outputs.has_section == 'true'
         run: |
           set -euo pipefail
-          mkdir -p .release-tmp
-          RAW="https://raw.githubusercontent.com/SyncTek-LLC/simdrive/${{ steps.vars.outputs.tag }}/simdrive/CHANGELOG.md"
-          curl -fsSL "$RAW" -o .release-tmp/CHANGELOG.md
+          base64 -d .release-tmp/section.b64 > .release-tmp/CHANGELOG.md
+          wc -l .release-tmp/CHANGELOG.md
+          head -3 .release-tmp/CHANGELOG.md
 
-      - name: Apply release to docs
+      - name: Apply release to docs (full -- prepends changelog section)
+        if: steps.vars.outputs.has_section == 'true'
         env:
           SIMDRIVE_VERSION: ${{ steps.vars.outputs.version }}
           SIMDRIVE_TAG: ${{ steps.vars.outputs.tag }}
@@ -81,6 +101,12 @@ jobs:
           SIMDRIVE_RELEASE_URL: ${{ steps.vars.outputs.release_url }}
           SIMDRIVE_CHANGELOG_PATH: .release-tmp/CHANGELOG.md
         run: node scripts/apply-release.mjs
+
+      - name: Metadata-only run (no section provided)
+        if: steps.vars.outputs.has_section != 'true'
+        run: |
+          set -euo pipefail
+          echo "::warning::metadata-only run -- changelog/index.mdx NOT updated for ${{ steps.vars.outputs.version }} (no changelog_section_b64 provided). Re-run with the b64 input or do a local backfill."
 
       - name: Commit + push (Mintlify picks it up on push to main)
         run: |
