@@ -1,0 +1,96 @@
+# Auto-update Mintlify docs on engine release.
+#
+# Triggered by `repository_dispatch` event_type=simdrive-release sent from
+# `SyncTek-LLC/simdrive` after a successful PyPI publish. Payload:
+#   { version, tag, pypi_url, changelog_url, release_url }
+#
+# Action plan:
+#   1. Fetch the engine CHANGELOG.md at the release tag.
+#   2. Run scripts/apply-release.mjs to:
+#        - Update `changelog/index.mdx` -- prepend the new release block.
+#        - Update `quickstart/install.mdx` install snippet if we ever move
+#          from `pip install simdrive` (unpinned) to a pinned form.
+#        - Update `mint.json` `name` field only if we surface the version
+#          there (today we don't -- keep this slot open).
+#   3. Commit + push to main. Mintlify auto-deploys on push (~30s build).
+#
+# Manual fallback: run scripts/apply-release.mjs locally with env vars set
+# and `git push`.
+
+name: Apply SimDrive release
+
+on:
+  repository_dispatch:
+    types: [simdrive-release]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Engine version, e.g. 1.0.0b6"
+        required: true
+      tag:
+        description: "Engine git tag, e.g. simdrive-v1.0.0b6"
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Resolve payload
+        id: vars
+        env:
+          P_VERSION: ${{ github.event.client_payload.version }}
+          P_TAG: ${{ github.event.client_payload.tag }}
+          P_RELEASE_URL: ${{ github.event.client_payload.release_url }}
+          P_PYPI_URL: ${{ github.event.client_payload.pypi_url }}
+          I_VERSION: ${{ inputs.version }}
+          I_TAG: ${{ inputs.tag }}
+        run: |
+          set -euo pipefail
+          VER="${P_VERSION:-$I_VERSION}"
+          TAG="${P_TAG:-$I_TAG}"
+          PYPI_URL="${P_PYPI_URL:-https://pypi.org/project/simdrive/${VER}/}"
+          RELEASE_URL="${P_RELEASE_URL:-https://github.com/SyncTek-LLC/simdrive/releases/tag/${TAG}}"
+          echo "version=$VER"             >> "$GITHUB_OUTPUT"
+          echo "tag=$TAG"                 >> "$GITHUB_OUTPUT"
+          echo "pypi_url=$PYPI_URL"       >> "$GITHUB_OUTPUT"
+          echo "release_url=$RELEASE_URL" >> "$GITHUB_OUTPUT"
+
+      - name: Fetch upstream CHANGELOG at tag
+        run: |
+          set -euo pipefail
+          mkdir -p .release-tmp
+          RAW="https://raw.githubusercontent.com/SyncTek-LLC/simdrive/${{ steps.vars.outputs.tag }}/simdrive/CHANGELOG.md"
+          curl -fsSL "$RAW" -o .release-tmp/CHANGELOG.md
+
+      - name: Apply release to docs
+        env:
+          SIMDRIVE_VERSION: ${{ steps.vars.outputs.version }}
+          SIMDRIVE_TAG: ${{ steps.vars.outputs.tag }}
+          SIMDRIVE_PYPI_URL: ${{ steps.vars.outputs.pypi_url }}
+          SIMDRIVE_RELEASE_URL: ${{ steps.vars.outputs.release_url }}
+          SIMDRIVE_CHANGELOG_PATH: .release-tmp/CHANGELOG.md
+        run: node scripts/apply-release.mjs
+
+      - name: Commit + push (Mintlify picks it up on push to main)
+        run: |
+          set -euo pipefail
+          git config user.name  "synctek-release-bot"
+          git config user.email "release-bot@synctek.io"
+          if git diff --quiet && git diff --cached --quiet; then
+            echo "No docs changes for ${{ steps.vars.outputs.version }} -- nothing to commit."
+            exit 0
+          fi
+          git add -A
+          git commit -m "docs(release): bump docs to ${{ steps.vars.outputs.version }} [INIT-2026-551]"
+          git push origin main
