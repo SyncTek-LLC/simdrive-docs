@@ -36,9 +36,12 @@ if (!VERSION || !TAG || !CHANGELOG_PATH) {
 }
 
 const upstream = await fs.readFile(CHANGELOG_PATH, "utf8");
+// NO `m` flag: with `m`, `$` matches end-of-line and the lazy quantifier
+// collapses to zero chars (captures only the heading). Without `m`, `$`
+// is end-of-string -- works for both multi-version CHANGELOG.md and
+// single-section payload files (Track B base64-decoded section).
 const re = new RegExp(
   `(##\\s*\\[?${escapeRegex(VERSION)}\\]?[^\\n]*\\n[\\s\\S]*?)(?=\\n##\\s*\\[|$)`,
-  "m",
 );
 const m = upstream.match(re);
 if (!m) {
