@@ -1,39 +1,39 @@
 ---
-title: Replay in CI
-description: "Record once with AI, replay free on every CI run."
+title: Replaying recordings
+description: "How replay works today, and what a standalone CI runner would need."
 ---
 
-## TLDR
+## What exists today
 
-```yaml
-# .github/workflows/ios-replays.yml
-name: SimDrive replays
-on: [pull_request]
-jobs:
-  replay:
-    runs-on: macos-15
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with: { python-version: '3.11' }
-      - run: pip install simdrive
-      - run: simdrive auth ${{ secrets.SIMDRIVE_LICENSE_KEY }}
-      - run: xcodebuild -scheme MyApp -destination 'platform=iOS Simulator,name=iPhone 17' build
-      - run: simdrive replay ENG-1247-repro --recording-root ./recordings
+There is **no standalone `simdrive replay` CLI**. The engine's console-script
+entry points are `simdrive` and `simdrive-mcp` (both start the MCP server) —
+see `[project.scripts]` in `pyproject.toml`. Replay runs through the MCP
+`replay` tool, from inside an agent session:
+
+```text
+You (in Cursor / Claude Code):
+  "Replay the ENG-1247-repro recording against iPhone 17 / iOS 26.3."
+
+Claude:
+  → replay({ name: "ENG-1247-repro", device: "iPhone 17" })
 ```
 
-CI replay is **free** — no AI tokens consumed once the recording exists.
-SimDrive only uses the model when an agent is *creating* a flow (record), not
-replaying one.
+The replay itself doesn't call a model — it re-observes the screen, resolves
+the recorded target, and checks the rendered frame against the recording via
+SSIM. What costs a model call is having an agent session available to invoke
+the `replay` tool in the first place.
+
+## Running it unattended (e.g. in CI)
+
+Today that means running an MCP-capable agent (Claude Code or another MCP
+client) inside your CI job, wired to call `replay` for the recordings you
+want to check. There is no packaged GitHub Action, no headless replay
+runner, and no license required — SimDrive is free to install and use.
 
 ## Coming soon
 
-Detailed walkthrough including:
-
-- Matrix builds across simulator + real device
-- Caching the simulator runtime to shave 4 minutes off cold start
-- Per-PR replay subsets via `--tag pr-smoke`
-- Failure artifact upload (drift diffs, before/after PNGs)
-- Bitrise, CircleCI, and self-hosted runner examples
+A dedicated CI story (headless replay invocation without a full agent
+session, matrix builds across simulator + real device, failure-artifact
+upload) is not built yet. This page will be updated when it ships.
 
 {/* TODO: full CI guide */}

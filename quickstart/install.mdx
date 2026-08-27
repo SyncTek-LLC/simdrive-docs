@@ -1,6 +1,6 @@
 ---
 title: Install
-description: "pip install simdrive, start a trial, wire the MCP server."
+description: "pip install simdrive and wire the MCP server. No license required."
 ---
 
 ## Requirements
@@ -30,29 +30,13 @@ simdrive doctor          # walks every dependency, prints a green/red table
 Xcode, broken simulator runtimes, stale `simctl` caches, and WDA bootstrap
 issues without spinning up a real session.
 
-## Start a trial
-
-```bash
-simdrive trial start --email you@example.com
-```
-
-The trial is **14 days, all Pro features, fully offline.** The license is
-Ed25519-signed and machine-locked — it works in CI sandboxes, on flights, and
-on developer laptops that can't reach the network. There is no
-phone-home check after activation.
-
-After 14 days, paid licenses unlock the full surface:
-
-```bash
-simdrive auth <your-license-key>
-```
-
-See [Licensing — Paid](/license/paid) for what to do if your key is lost or
-you move to a new machine.
+SimDrive requires no license or account — every tool is available
+immediately after install, on any number of machines, including CI
+runners. See [License](/license/paid) for details.
 
 ## Wire SimDrive into your MCP client
 
-SimDrive runs as an MCP server. Add it once, your agent gets all 32 tools.
+SimDrive runs as an MCP server. Add it once, your agent gets all 36 tools.
 
 <Tabs>
   <Tab title="Claude Code">
