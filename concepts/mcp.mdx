@@ -6,7 +6,7 @@ description: "Why SimDrive is built as an MCP server, and what that buys you."
 ## The 10-second version
 
 Your AI agent already knows how to call tools. SimDrive exposes the iOS
-simulator (and paired devices) as **32 tools your agent can call directly**
+simulator (and paired devices) as **36 tools your agent can call directly**
 over [Model Context Protocol](https://modelcontextprotocol.io). No DSL, no
 selector framework, no glue code — the agent reads ticket, calls `tap` and
 `type_text`, gets back screenshots and structured state.
@@ -29,7 +29,7 @@ the agent that drives the simulator.
 This only works because MCP standardizes how agents discover and call tools.
 SimDrive doesn't ship a special client — it ships an MCP server. Any client
 that speaks MCP (Claude Code, Claude Desktop, Cursor, future clients) gets
-the full 32-tool surface for free.
+the full 36-tool surface for free.
 
 ## What an MCP tool looks like
 

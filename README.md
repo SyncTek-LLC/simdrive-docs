@@ -4,7 +4,7 @@ Source for [docs.simdrive.dev](https://docs.simdrive.dev) — built with
 [Mintlify](https://mintlify.com).
 
 > SimDrive is MCP-native iOS automation: reproduce and validate iOS bugs in
-> 60 seconds with Claude. Record once, replay free in CI.
+> 60 seconds with Claude. Record once, replay deterministically later.
 
 This repo is **MIT-licensed** so the community can contribute fixes,
 clarifications, and new how-to guides. The SimDrive package itself is
@@ -19,8 +19,8 @@ Elastic-2.0 — see [SyncTek-LLC/simdrive](https://github.com/SyncTek-LLC/simdri
 ├── quickstart/           # install + first bug + CI replay
 ├── concepts/             # mental model (MCP, sessions, observe, replay, ...)
 ├── guides/               # how-tos (bug repro, CI, real device, journeys)
-├── reference/            # 32 MCP tool reference, grouped
-├── license/              # trial + paid + seats (product licensing, not repo license)
+├── reference/            # 36 MCP tool reference, grouped
+├── license/              # not sold commercially — see /license/paid
 ├── changelog/            # release notes mirror
 ├── troubleshooting.mdx   # common errors & fixes
 ├── logo/                 # SimDrive brand SVGs (wordmark, favicon)
@@ -77,7 +77,7 @@ These docs are written by hand against:
 - [`simdrive/CHANGELOG.md`](https://github.com/SyncTek-LLC/simdrive/blob/main/simdrive/CHANGELOG.md)
   — release notes (mirrored manually for now; automated sync is on the
   roadmap).
-- The 32 MCP tool schemas in `simdrive/src/simdrive/server.py::_TOOLS` —
+- The 36 MCP tool schemas in `simdrive/src/simdrive/server.py::_TOOLS` —
   canonical when this reference drifts.
 
 ## License

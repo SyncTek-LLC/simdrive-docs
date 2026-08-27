@@ -19,7 +19,7 @@ description: "Reproduce and validate iOS bugs in 60 seconds with Claude."
 SimDrive is the **MCP-native iOS automation toolkit your AI agent already knows
 how to drive.** Hand it a Linear ticket, watch it walk the steps in the
 simulator (or a paired real device), and get back a deterministic recording
-that replays free in CI forever.
+that replays the same way every time.
 
 ```text
 You (in Cursor / Claude Code):
@@ -36,8 +36,8 @@ Claude:
   → record_stop({name: "ENG-1247-repro"})  # YAML+PNG attached to PR
 ```
 
-After you ship the fix, the same recording replays free in CI — no AI cost on
-every run.
+After you ship the fix, ask the agent to replay the same recording to confirm
+it still fails (or now passes) before deploy.
 
 ## Why SimDrive
 
@@ -45,11 +45,11 @@ every run.
   <Card title="Bug repro in 60s" icon="bug" href="/quickstart/first-bug">
     Paste the ticket, watch the agent walk it, attach the recording to the PR.
   </Card>
-  <Card title="Record once, replay free" icon="circle-play" href="/concepts/replay">
-    Recordings are deterministic YAML + PNG bundles. Zero AI cost on replay.
+  <Card title="Record once, replay anytime" icon="circle-play" href="/concepts/replay">
+    Recordings are deterministic YAML + PNG bundles you can replay later via the `replay` tool.
   </Card>
   <Card title="MCP-native" icon="plug" href="/concepts/mcp">
-    32 tools your agent already knows. No selectors, no custom DSL.
+    36 tools your agent already knows. No selectors, no custom DSL.
   </Card>
   <Card title="Real iOS device" icon="mobile" href="/guides/real-device">
     WebDriverAgent-backed. One command bring-up per device.
@@ -60,13 +60,13 @@ every run.
 
 <CardGroup cols={3}>
   <Card title="Install" icon="terminal" href="/quickstart/install">
-    `pip install simdrive` and trial activation.
+    `pip install simdrive` — no license or account required.
   </Card>
   <Card title="First bug" icon="rocket" href="/quickstart/first-bug">
     Reproduce a bug in 60 seconds.
   </Card>
-  <Card title="CI replay" icon="github" href="/quickstart/ci">
-    Wire recordings into GitHub Actions.
+  <Card title="Replaying recordings" icon="github" href="/quickstart/ci">
+    How replay works today, and what a CI runner would need.
   </Card>
 </CardGroup>
 
@@ -78,8 +78,9 @@ Honesty up front:
   is your AI agent.
 - Not a selector-based test framework. SimDrive uses vision + set-of-marks
   annotation, not XPath or accessibility IDs.
-- Not a CI runner. SimDrive runs *inside* your CI (GitHub Actions, Bitrise,
-  CircleCI) — bring your own runner.
+- Not a CI runner. There's no standalone replay CLI today — replay runs
+  through the MCP `replay` tool from within an agent session. See
+  [Replaying recordings](/quickstart/ci).
 
 ## License
 

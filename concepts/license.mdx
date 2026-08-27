@@ -1,50 +1,20 @@
 ---
-title: Trial + paid licensing
-description: "Ed25519-signed, machine-locked, fully offline."
+title: License
+description: "SimDrive requires no license, trial, or account."
 ---
 
 ## TLDR
 
-| Plan | Price | What you get |
-|------|-------|--------------|
-| **Trial** | Free, 14 days | All Pro features, machine-locked |
-| **Pro** | $29 / month | One seat, all tools, unlimited CI replays |
-| **Team** | $99 / seat / month | Multi-seat, shared recording cloud |
-| **Enterprise** | Contact | Self-hosted licensing, SLA, integrations |
+SimDrive is not offered as a commercial product (INIT-2026-605). There are
+no paid tiers, no trial, and nothing to activate — every tool is available
+immediately after `pip install simdrive`, under the
+[Elastic License 2.0](https://www.elastic.co/licensing/elastic-license).
 
-Full pricing + ROI calculator: [simdrive.dev/pricing](https://simdrive.dev/pricing).
+## Why there's nothing to license
 
-## How licenses work
+Earlier versions shipped a machine-locked, Ed25519-signed trial/paid
+licensing system gating the MCP tool surface. That commercial model was
+retired 2026-08-26. If you're running one of those older versions and see a
+license-related error, update to the latest release.
 
-SimDrive licenses are **Ed25519-signed JWT-shaped tokens** that bind a
-license id to a machine fingerprint. There is **no phone-home check** after
-`simdrive auth`. The runtime verifies the signature locally on every tool
-call. This is intentional:
-
-- CI runners (often offline or with restricted egress) work without network.
-- Air-gapped enterprise environments work.
-- We don't see what you're testing.
-
-## Trial vs paid
-
-The trial issues a 14-day token signed with the same key as paid licenses.
-It unlocks every Pro tool — there is no functional difference between trial
-and paid except expiry. After day 14:
-
-- `session_start` returns `LicenseError: trial expired`
-- All record/replay/observe tools refuse
-- `version`, `doctor`, and `simdrive auth` still work
-
-`simdrive auth <key>` replaces the trial with a paid token.
-
-## Coming soon
-
-- The full license token schema (fields, claims, fingerprint algorithm)
-- Seat management for Team plan (`simdrive seats list`, `add`, `revoke`)
-- Self-hosted licensing for Enterprise (your own signing key, your own auth
-  server)
-
-{/* TODO: licensing deep-dive */}
-
-See also: [License → Paid](/license/paid) for the operational runbook
-(activating, lost keys, machine migration).
+See also: [License](/license/paid) for the current, simplified page.

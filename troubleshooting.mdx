@@ -13,21 +13,12 @@ It walks every dependency (Xcode, simctl, Python, license, WDA if device
 target is enabled) and prints a green/red table with suggested fixes. Most
 issues below are surfaced by `doctor` directly.
 
-## `LicenseError: trial expired`
+## License errors
 
-Your 14-day trial is up. Activate a paid license:
-
-```bash
-simdrive auth <your-license-key>
-```
-
-See [License → Paid](/license/paid).
-
-## `LicenseError: machine fingerprint mismatch`
-
-Your key is bound to a different machine. Either run `simdrive license
-release` on the other machine, or email
-[hello@synctek.io](mailto:hello@synctek.io) to force-release the binding.
+SimDrive is not sold commercially (INIT-2026-605) — there is no trial and
+nothing to license. If you're seeing an old license-related error from a
+prior version, update to the latest release; no license or account is
+required.
 
 ## `WDA bootstrap failed` (real device)
 
@@ -56,13 +47,14 @@ To investigate:
 - If the difference is intentional (e.g. you redesigned the screen),
   re-record the flow. Recordings are cheap.
 
-If you need to push past a known-flappy step for one CI run only:
+If you need to push past a known-flappy step for one run only, ask the agent
+to replay with drift set to `warn` instead of `halt`:
 
-```bash
-simdrive replay <name> --drift warn
+```json
+{ "name": "<name>", "drift": "warn" }
 ```
 
-`--drift warn` still logs the divergence but doesn't halt. Don't make this
+`drift: "warn"` still logs the divergence but doesn't halt. Don't make this
 the default — you'll regret it the day a real regression slips through.
 
 ## `replay_state_contract_failed`
@@ -126,7 +118,6 @@ runtimes. Add a ~1.5s pause (or one `observe()`) before the next action.
 1. **Simulator runtime mismatch.** Pin the runtime in CI:
    `xcodebuild -destination 'platform=iOS Simulator,name=iPhone 17,OS=26.3'`
 2. **App build is stale.** Add a build step before the replay.
-3. **License not activated** on the CI runner. Add `simdrive auth ${{ secrets.SIMDRIVE_LICENSE_KEY }}` to the workflow.
 
 If all three are correct and the replay still fails, check the drift PNG
 artifact — it'll show you exactly which screen diverged.
