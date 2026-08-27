@@ -17,8 +17,8 @@ This page mirrors the most recent entries; sync is currently manual.
 ### Added
 
 - **MCP registry metadata** (`server.json` + README discovery tag) for Anthropic / Smithery / awesome-mcp-servers ingestion. The `<!-- mcp-name: io.github.SyncTek-LLC/simdrive -->` HTML comment at the top of `README.md` (root) and `simdrive/README.md` lets the official MCP registry verify the package; `server.json` at the repo root declares the canonical metadata (name, version, repo, license, runtime, packages, transport=stdio, runtimeHint=uvx) per the [MCP registry schema](https://github.com/modelcontextprotocol/registry).
-- **Opt-in marketing-attribution flag on the (now-retired) trial-activation command** — sent one POST to `https://api.simdrive.dev/trial` with `{hashed_email, source, ts, package_version, os}`. **Raw email never left the machine** — only SHA-256(email.lower.strip) was transmitted. Omitting the flag recorded the referral as `"direct"`.
-- **Explicit per-invocation telemetry opt-out** — skipped the network call; the trial license still generated locally. Persistent opt-out: create `~/.simdrive/telemetry.toml` containing `track = false` (or set `SIMDRIVE_TELEMETRY_OFF=1`) to disable source-tracking permanently for that user.
+- **`simdrive trial start --source <channel>`** — opt-in marketing-attribution flag. The CLI sends one POST to `https://api.simdrive.dev/trial` with `{hashed_email, source, ts, package_version, os}`. **Raw email never leaves the machine** — only SHA-256(email.lower.strip) is transmitted. Omitting the flag records the trial as `"direct"`.
+- **`simdrive trial start --no-track`** — explicit per-invocation opt-out. Skips the network call; trial license still generates locally. Persistent opt-out: create `~/.simdrive/telemetry.toml` containing `track = false` (or set `SIMDRIVE_TELEMETRY_OFF=1`) to disable source-tracking permanently for that user.
 
 ### Notes
 
@@ -82,9 +82,9 @@ Full upstream entry: https://github.com/SyncTek-LLC/simdrive/releases/tag/simdri
 
 ### Added — Business model
 
-- **Trial-activation command** — issued an Ed25519-signed local license valid for 14 days, full Pro feature access. Email+machine SHA-256 de-dupe prevented infinite re-trials.
-- **License authentication command** — redeemed a Polar-issued production license, validated against an embedded public key.
-- **Entitlement gating on every MCP tool** — the entire 32-tool MCP surface at the time gated on an entitlement check. After trial expiry, a structured error was raised so the MCP client could surface a copy-pasteable recovery path.
+- **14-day free trial** — `simdrive trial start --email you@example.com` issues an Ed25519-signed local license valid for 14 days, full Pro feature access. Email+machine SHA-256 de-dupe prevents infinite re-trials.
+- **License authentication** — `simdrive auth <license-key>` redeems a Polar-issued production license. Writes to `~/.simdrive/license.json`, validates against the embedded public key.
+- **Paywall enforcement on every MCP tool** — all 32 MCP tools now gate on `check_entitlement()`. After trial expiry, `LicenseError` is raised with a structured `license_required` envelope (`pricing_url`, `auth_command_hint`, `trial_command_hint`) so the MCP client surfaces a copy-pasteable recovery path.
 
 ### Added — Positioning
 
